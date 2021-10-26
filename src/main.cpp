@@ -1,19 +1,18 @@
 /** A simple example program that allows us to flash an LED over a Bluetooth "classic"
  * connection.
- * Author: Marc Chmielewski 
+ * Author: Marc Chmielewski
  **/
 
 #include "Arduino.h"
 #include "BluetoothSerial.h"
 #include "LIDARLite_v4LED.h"
 
-
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
 BluetoothSerial SerialBT;
-LIDARLite_v4LED myLIDAR; //Click here to get the library: http://librarymanager/All#SparkFun_LIDARLitev4 by SparkFun
+LIDARLite_v4LED myLIDAR;
 bool enable = 0;
 
 
