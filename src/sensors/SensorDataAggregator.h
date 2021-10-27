@@ -9,11 +9,12 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include "../util/StringKeyedDataSource.h"
 #include "Sensor.h"
 
 using namespace std;
 
-class SensorDataAggregator: SensorDataListener {
+class SensorDataAggregator: SensorDataListener, StringKeyedDataSource<float> {
 private:
   unordered_map<string, float>* sensor_data;
   unordered_set<string>* invalid_sensors;
@@ -24,6 +25,7 @@ public:
   void registerSensor(string sensorID);
   void postSensorData(string sensorID, float& measurement);
   void invalidateSensorData(string sensorID);
+  unordered_map<string, float>* getData();
 };
 
 #endif

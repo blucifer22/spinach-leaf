@@ -4,6 +4,8 @@
  * Author: David Coffman
  **/
 
+#include <string>
+#include <unordered_map>
 #include "Sensor.h"
 #include "SensorDataAggregator.h"
 
@@ -27,4 +29,8 @@ void SensorDataAggregator::postSensorData(string sensorID, float& measurement) {
 
 void SensorDataAggregator::invalidateSensorData(string sensorID) {
   this->invalid_sensors->insert(sensorID);
+}
+
+unordered_map<string, float>* SensorDataAggregator::getData() {
+  return this->sensor_data;
 }
