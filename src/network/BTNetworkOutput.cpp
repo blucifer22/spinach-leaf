@@ -25,6 +25,9 @@ void BTNetworkOutput<T>::sendFromDataSource(StringKeyedDataSource<T>* source) {
     result.append(valueString);
     result.append(",");
   }
+  if (result.back() == ",") {
+    result.pop_back();
+  }
   result.append("\n}");
   char* res = result.c_str();
   serial->println(res);
