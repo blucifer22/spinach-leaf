@@ -25,7 +25,7 @@ void BTNetworkOutput<T>::sendFromDataSource(StringKeyedDataSource<T>* source) {
     result.append(valueString);
     result.append(",");
   }
-  if (result.back() == ",") {
+  if (result.back() == ',') {
     result.pop_back();
   }
   result.append("\n}");
