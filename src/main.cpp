@@ -15,6 +15,8 @@
 
 #define NUM_SENSORS 2
 
+#define CLOSE_RANGE 2
+
 QWIICMUX myMux;
 
 BluetoothSerial SerialBT;
@@ -31,9 +33,10 @@ void setup() {
   Serial.println("The device started, now you can pair it with bluetooth!");
   Wire.begin(); //Join I2C bus
 
+  
   // check if Feather can find the mux board
   if (myMux.begin() == false) {
-    Serial.println("Device did not acknowledge! Freezing.");
+    Serial.println("Device did not acknowledge! Not Freezing.");
     while(1);
   }
 
@@ -42,26 +45,33 @@ void setup() {
     myMux.setPort(i);
     //check if LIDAR will acknowledge over I2C
     if (myLIDAR[i].begin() == false) {
+      Serial.printf("Sensor: %d", i);
       Serial.println("Device did not acknowledge! Freezing.");
       while(1);
     }
 
       Serial.println("LIDAR acknowledged!");
-      myLIDAR[i].configure(2);
+      myLIDAR[i].configure(CLOSE_RANGE);
   }
+
 }
 
 
 void loop() {
   if (enable) {
-    float newDistance;
+    // loop through LIDARs and get distance readings
+    for (byte i = 0; i < NUM_SENSORS; i++) {
+      myMux.setPort(i);
 
-    //getDistance() returns the distance reading in cm
-    newDistance = myLIDAR.getDistance();
+      //getDistance() returns the distance reading in cm
+      float newDistance = myLIDAR[i].getDistance();
 
-    //Print to Serial port
-    //SerialBT.printf("New distance: %f cm\n", newDistance);
-    Serial.printf("New distance: %f cm\n", newDistance);
+      //Print to Serial port
+      //SerialBT.printf("New distance: %f cm\n", newDistance);
+      Serial.printf("New distance, lidar %d: %f cm ", i, newDistance);
+    }
+    Serial.printf("\n");
+
   }
   if (SerialBT.available()) {
     int sentInt = SerialBT.parseInt();
@@ -81,15 +91,3 @@ void loop() {
   }
   delay(20);
 }
-
-/*
-
-  bool begin(uint8_t deviceAddress = QWIIC_MUX_DEFAULT_ADDRESS, TwoWire &wirePort = Wire); //Check communication and initialize device
-  bool isConnected();                                                                      //Returns true if device acks at the I2C address
-  bool setPort(uint8_t portNumber);                                                        //Enable a single port. All other ports disabled.
-  bool setPortState(uint8_t portBits);                                                     //Overwrite port register with all 8 bits. Allows multiple bit writing in one call.
-  uint8_t getPort();                                                                       //Returns the bit position of the first enabled port. Useful for IDing which port number is enabled.
-  uint8_t getPortState();                                                                  //Returns current 8-bit wide state. May have multiple bits set in 8-bit field.
-  bool enablePort(uint8_t portNumber);                                                     //Enable a single port without affecting other bits
-  bool disablePort(uint8_t portNumber); 
-*/
