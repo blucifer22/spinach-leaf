@@ -13,27 +13,28 @@ class BLEProvider {
 private:
     BLEServer* pServer;
     BLEService* pService;
+    BLECharacteristic* pConfig;
     BLECharacteristic* pLeft;
     BLECharacteristic* pCenter;
     BLECharacteristic* pRight;
-    
+
 public:
-    BLEProvider::BLEProvider() {
+    BLEProvider() {
         BLEDevice::init("SpinachLeaf");
         this->pServer = BLEDevice::createServer();
         this->pService = this->pServer->createService(SERVICE_UUID);
         this->pConfig = this->pService->createCharacteristic(CONFIG_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-        
+
         this->pLeft = this->pService->createCharacteristic(LEFT_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
         this->pCenter = this->pService->createCharacteristic(CENTER_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
         this->pRight = this->pService->createCharacteristic(CENTER_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-        
+
         this->pLeft->setValue("-1");
         this->pCenter->setValue("-2");
         this->pRight->setValue("-3");
-        
+
         this->pService->start();
-        
+
         BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
         pAdvertising->addServiceUUID(SERVICE_UUID);
         pAdvertising->setScanResponse(true);
@@ -41,16 +42,25 @@ public:
         pAdvertising->setMinPreferred(0x12);
         BLEDevice::startAdvertising();
     }
-    
-    BLEProvider::updateLeftLidar(int newVal) {
-        this->pLeft->setValue(to_string(newVal));
+
+    void updateLeftLidar(int newVal) {
+        char* my_str = new char[20];
+        snprintf(my_str, 20, "%d", newVal);
+        this->pLeft->setValue(my_str);
+        delete my_str;
     }
-    
-    BLEProvider::updateCenterLidar(int newVal) {
-        this->pCenter->setValue(to_string(newVal));
+
+    void updateCenterLidar(int newVal) {
+      char* my_str = new char[20];
+      snprintf(my_str, 20, "%d", newVal);
+      this->pCenter->setValue(my_str);
+      delete my_str;
     }
-    
-    BLEProvider::updateRightLidar(int newVal) {
-        this->pRight->setValue(to_string(newVal));
+
+    void updateRightLidar(int newVal) {
+      char* my_str = new char[20];
+      snprintf(my_str, 20, "%d", newVal);
+      this->pRight->setValue(my_str);
+      delete my_str;
     }
-}
+};
