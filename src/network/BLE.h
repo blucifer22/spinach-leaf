@@ -43,6 +43,10 @@ public:
         BLEDevice::startAdvertising();
     }
 
+    bool sensorsEnabled() {
+      return true;
+    }
+
     void updateLeftLidar(int newVal) {
         char* my_str = new char[20];
         snprintf(my_str, 20, "%d", newVal);
