@@ -67,11 +67,10 @@ void loop() {
       float newDistance = myLIDAR[i].getDistance();
 
       //Print to Serial port
-      //SerialBT.printf("New distance: %f cm\n", newDistance);
-      Serial.printf("New distance, lidar %d: %f cm ", i, newDistance);
+      SerialBT.printf("lidar %d: %f cm ", i, newDistance);
+      //Serial.printf("New distance, lidar %d: %f cm ", i, newDistance);
     }
-    Serial.printf("\n");
-
+    SerialBT.printf("\n");
   }
   if (SerialBT.available()) {
     int sentInt = SerialBT.parseInt();
