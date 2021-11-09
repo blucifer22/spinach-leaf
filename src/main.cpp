@@ -32,7 +32,6 @@ void setup() {
   pinMode(BUILTIN_LED, OUTPUT);
   Wire.begin(); //Join I2C bus
 
-
   // check if Feather can find the mux board
   if (myMux.begin() == false) {
     Serial.println("Device did not acknowledge! Not Freezing.");
@@ -57,7 +56,7 @@ void setup() {
 
 
 void loop() {
-  if (enable) {
+  if (ble.sensorsEnabled()) {
     // loop through LIDARs and get distance readings
     for (byte i = 0; i < NUM_SENSORS; i++) {
       myMux.setPort(i);
@@ -76,14 +75,12 @@ void loop() {
 
   // BLE
   if(ble.sensorsEnabled()) {
-    enable = 0;
-    digitalWrite(BUILTIN_LED, LOW);
-    Serial.println("Now you don't!");
-  }
-  else {
-    enable = 1;
     digitalWrite(BUILTIN_LED, HIGH);
     Serial.println("Now you see me!");
+  }
+  else {
+    digitalWrite(BUILTIN_LED, LOW);
+    Serial.println("Now you don't!");
   }
   delay(20);
 }
