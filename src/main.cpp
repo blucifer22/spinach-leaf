@@ -6,7 +6,7 @@
 #include "Arduino.h"
 #include "BluetoothSerial.h"
 #include "LIDARLite_v4LED.h"
-#include "network/BLE.h"
+#include "network/BLE.hpp"
 
 #include "SparkFun_I2C_Mux_Arduino_Library.h"
 
@@ -20,17 +20,20 @@
 
 QWIICMUX myMux;
 
-BLEProvider ble;
+BLEProvider* ble;
 LIDARLite_v4LED myLIDAR[2];
 
 // CHANGED for development purposes since I don't have a bluetooth serial monitor
 bool enable = 1;
 
-
 void setup() {
   Serial.begin(115200);
   pinMode(BUILTIN_LED, OUTPUT);
-  Wire.begin(); //Join I2C bus
+  Wire.begin(); //Join I2C 
+  
+  Serial.println("Powered on!");
+
+  ble = new BLEProvider();
 
   // check if Feather can find the mux board
   if (myMux.begin() == false) {
@@ -56,25 +59,25 @@ void setup() {
 
 
 void loop() {
-  if (ble.sensorsEnabled()) {
+  if (ble->sensorsEnabled()) {
     // loop through LIDARs and get distance readings
     for (byte i = 0; i < NUM_SENSORS; i++) {
       myMux.setPort(i);
 
       //getDistance() returns the distance reading in cm
       float newDistance = myLIDAR[i].getDistance();
-      ble.updateLeftLidar((int) newDistance);
+      ble->updateLeftLidar((int) newDistance);
 
       //Print to Serial port
       //SerialBT.printf("New distance: %f cm\n", newDistance);
-      Serial.printf("New distance, lidar %d: %f cm ", i, newDistance);
+      Serial.printf("lidar %d: %f cm ", i, newDistance);
     }
     Serial.printf("\n");
 
   }
 
   // BLE
-  if(ble.sensorsEnabled()) {
+  if(ble->sensorsEnabled()) {
     digitalWrite(BUILTIN_LED, HIGH);
     Serial.println("Now you see me!");
   }
