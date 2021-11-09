@@ -1,28 +1,27 @@
 #include "BLE.hpp"
 
-
 BLEProvider::BLEProvider() {
-    BLEDevice::init("SpinachLeaf");
+    NimBLEDevice::init("SpinachLeaf");
     this->pServer = BLEDevice::createServer();
     this->pService = this->pServer->createService(SERVICE_UUID);
-    this->pConfig = this->pService->createCharacteristic(CONFIG_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
 
-    this->pLeft = this->pService->createCharacteristic(LEFT_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-    this->pCenter = this->pService->createCharacteristic(CENTER_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-    this->pRight = this->pService->createCharacteristic(CENTER_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
+    this->pConfig = this->pService->createCharacteristic(CONFIG_UUID, NIMBLE_PROPERTY::WRITE_NR | NIMBLE_PROPERTY::READ);
+    this->pLeft = this->pService->createCharacteristic(LEFT_LIDAR_UUID);
+    this->pCenter = this->pService->createCharacteristic(CENTER_LIDAR_UUID);
+    this->pRight = this->pService->createCharacteristic(CENTER_LIDAR_UUID);
+
+    this->pService->start();
 
     this->pLeft->setValue("-1");
     this->pCenter->setValue("-2");
     this->pRight->setValue("-3");
 
-    this->pService->start();
-
-    BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-    pAdvertising->addServiceUUID(SERVICE_UUID);
-    pAdvertising->setScanResponse(true);
-    pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-    pAdvertising->setMinPreferred(0x12);
-    BLEDevice::startAdvertising();
+    this->pAdvertising = NimBLEDevice::getAdvertising();
+    this->pAdvertising->addServiceUUID(SERVICE_UUID);
+    this->pAdvertising->setScanResponse(true);
+    this->pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+    bool didSucceed = this->pAdvertising->start();
+    printf(didSucceed ? "advertising!" : "not advertising!");
 }
 
 bool BLEProvider::sensorsEnabled() {

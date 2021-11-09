@@ -66,7 +66,10 @@ void loop() {
 
       //getDistance() returns the distance reading in cm
       float newDistance = myLIDAR[i].getDistance();
+      
       ble->updateLeftLidar((int) newDistance);
+      ble->updateCenterLidar((int) newDistance);
+      ble->updateRightLidar((int) newDistance);
 
       //Print to Serial port
       //SerialBT.printf("New distance: %f cm\n", newDistance);
