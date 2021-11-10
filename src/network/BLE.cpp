@@ -1,66 +1,65 @@
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
-#include <string>
+#define NUM_MEASUREMENT_BYTES 2
 
-#define SERVICE_UUID      "eaa636ce-ffc0-4444-923e-cb0622a6772f"
-#define CONFIG_UUID       "7815d597-62b4-4d3a-a58f-c4b2d9ae13e3"
-#define LEFT_LIDAR_UUID   "bcbc0b7d-c813-48c4-ac04-5289cff3ebf6"
-#define CENTER_LIDAR_UUID "51283344-4a85-472f-aef5-8023253bc0a5"
-#define RIGHT_LIDAR_UUID  "8799087d-e65a-4ea3-9331-7222cc242da2"
+#include "BLE.hpp"
 
-class BLEProvider {
-private:
-    BLEServer* pServer;
-    BLEService* pService;
-    BLECharacteristic* pConfig;
-    BLECharacteristic* pLeft;
-    BLECharacteristic* pCenter;
-    BLECharacteristic* pRight;
+BLEProvider::BLEProvider() {
+    NimBLEDevice::init("SpinachLeaf");
+    this->pServer = BLEDevice::createServer();
+    this->pService = this->pServer->createService(SERVICE_UUID);
 
-public:
-    BLEProvider() {
-        BLEDevice::init("SpinachLeaf");
-        this->pServer = BLEDevice::createServer();
-        this->pService = this->pServer->createService(SERVICE_UUID);
-        this->pConfig = this->pService->createCharacteristic(CONFIG_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
+    this->pConfig = this->pService->createCharacteristic(CONFIG_UUID, NIMBLE_PROPERTY::WRITE_NR | NIMBLE_PROPERTY::READ);
+    this->pLeft = this->pService->createCharacteristic(LEFT_LIDAR_UUID);
+    this->pCenter = this->pService->createCharacteristic(CENTER_LIDAR_UUID);
+    this->pRight = this->pService->createCharacteristic(RIGHT_LIDAR_UUID);
 
-        this->pLeft = this->pService->createCharacteristic(LEFT_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-        this->pCenter = this->pService->createCharacteristic(CENTER_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-        this->pRight = this->pService->createCharacteristic(CENTER_LIDAR_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
+    this->pService->start();
 
-        this->pLeft->setValue("-1");
-        this->pCenter->setValue("-2");
-        this->pRight->setValue("-3");
+    uint8_t* pConfigVal = new uint8_t[1] {2};
+    this->pConfig->setValue(pConfigVal, 1);
 
-        this->pService->start();
+    this->pLeftVal = (uint8_t*) calloc(NUM_MEASUREMENT_BYTES, 1);
+    this->updateLeftLidar(0);
 
-        BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-        pAdvertising->addServiceUUID(SERVICE_UUID);
-        pAdvertising->setScanResponse(true);
-        pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-        pAdvertising->setMinPreferred(0x12);
-        BLEDevice::startAdvertising();
+    this->pCenterVal = (uint8_t*) calloc(NUM_MEASUREMENT_BYTES, 1);
+    this->updateCenterLidar(0);
+
+    this->pRightVal = (uint8_t*) calloc(NUM_MEASUREMENT_BYTES, 1);
+    this->updateRightLidar(0);
+
+    this->pAdvertising = NimBLEDevice::getAdvertising();
+    this->pAdvertising->addServiceUUID(SERVICE_UUID);
+    this->pAdvertising->setScanResponse(true);
+    this->pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+    this->pAdvertising->start();
+}
+
+bool BLEProvider::sensorsEnabled() {
+    // printf("%d\n", this->pConfig->getValue()[0]);
+    return this->pConfig->getValue()[0] == 2;
+}
+
+void BLEProvider::updateLeftLidar(unsigned int newVal) {
+    // printf("%d %d\n", this->pLeftVal[0], this->pLeftVal[1]);
+    // printf("%d %d\n", this->pLeft->getValue()[0], this->pLeft->getValue()[1]);
+    for (int i = 0; i < NUM_MEASUREMENT_BYTES; i++) {
+        this->pLeftVal[i] = newVal % 0xFF;
+        newVal = newVal >> 8;
+        this->pLeft->setValue(this->pLeftVal, NUM_MEASUREMENT_BYTES);
     }
+}
 
-    void updateLeftLidar(int newVal) {
-        char* my_str = new char[20];
-        snprintf(my_str, 20, "%d", newVal);
-        this->pLeft->setValue(my_str);
-        delete my_str;
-    }
+void BLEProvider::updateCenterLidar(unsigned int newVal) {
+  for (int i = 0; i < NUM_MEASUREMENT_BYTES; i++) {
+      this->pCenterVal[i] = newVal % 0xFF;
+      newVal = newVal >> 8;
+      this->pCenter->setValue(this->pCenterVal, NUM_MEASUREMENT_BYTES);
+  }
+}
 
-    void updateCenterLidar(int newVal) {
-      char* my_str = new char[20];
-      snprintf(my_str, 20, "%d", newVal);
-      this->pCenter->setValue(my_str);
-      delete my_str;
-    }
-
-    void updateRightLidar(int newVal) {
-      char* my_str = new char[20];
-      snprintf(my_str, 20, "%d", newVal);
-      this->pRight->setValue(my_str);
-      delete my_str;
-    }
-};
+void BLEProvider::updateRightLidar(unsigned int newVal) {
+  for (int i = 0; i < NUM_MEASUREMENT_BYTES; i++) {
+      this->pRightVal[i] = newVal % 0xFF;
+      newVal = newVal >> 8;
+      this->pRight->setValue(this->pRightVal, NUM_MEASUREMENT_BYTES);
+  }
+}
