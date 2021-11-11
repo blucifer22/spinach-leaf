@@ -60,7 +60,15 @@ void loop() {
 
     for (byte i = 0; i < NUM_SENSORS; i++) {
       myMux.setPort(i);
-      distances[i] = myLIDAR[i].getDistance();
+      myLIDAR[i].takeRange();
+    }
+    for (byte i = 0; i < NUM_SENSORS; i++) {
+      myMux.setPort(i);
+      myLIDAR[i].waitForBusy();
+    }
+    for (byte i = 0; i < NUM_SENSORS; i++) {
+      myMux.setPort(i);
+      distances[i] = myLIDAR[i].readDistance();
       Serial.printf("lidar %d: %f cm ", i, distances[i]);
     }
     Serial.printf("\n");
