@@ -7,7 +7,7 @@ BLEProvider::BLEProvider() {
     this->pServer = BLEDevice::createServer();
     this->pService = this->pServer->createService(SERVICE_UUID);
 
-    this->pConfig = this->pService->createCharacteristic(CONFIG_UUID, NIMBLE_PROPERTY::WRITE_NR | NIMBLE_PROPERTY::READ);
+    this->pConfig = this->pService->createCharacteristic(CONFIG_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
     this->pLeft = this->pService->createCharacteristic(LEFT_LIDAR_UUID);
     this->pCenter = this->pService->createCharacteristic(CENTER_LIDAR_UUID);
     this->pRight = this->pService->createCharacteristic(RIGHT_LIDAR_UUID);
